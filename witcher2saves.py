@@ -337,6 +337,17 @@ class SaveTableView(QtGui.QTableView):
             else:
                 item.setCheckState(QtCore.Qt.Unchecked)
 
+    def count_checked(self):
+        """
+        Returns a count of how many savegames we have checked
+        """
+        count = 0
+        for row in range(self.model.rowCount()):
+            item = self.model.item(row)
+            if item.checkState() == QtCore.Qt.Checked:
+                count += 1
+        return count
+
     def delete_checked(self):
         """
         Deletes all checked items
@@ -493,8 +504,21 @@ class Gui(QtGui.QMainWindow):
         """
         Deletes our checked savegames.  Will automatically refresh afterwards.
         """
-        self.tv.delete_checked()
-        self.refresh()
+        count = self.tv.count_checked()
+        if count > 0:
+            if count == 1:
+                plural = ''
+            else:
+                plural = 's'
+
+            reply = QtGui.QMessageBox.question(self, 'Delete Savegame%s' % (plural),
+                    'Are you sure you want to delete %d checked savegame%s?' % (count, plural),
+                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                    QtGui.QMessageBox.No)
+            
+            if reply == QtGui.QMessageBox.Yes:
+                self.tv.delete_checked()
+                self.refresh()
 
     def update_total_size(self):
         """
