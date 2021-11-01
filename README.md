@@ -18,8 +18,8 @@ The utilty could be pretty easily modified to support OSX as well.  Its
 value on Windows is somewhat questionable since the other application
 already exists and apparently works well.
 
-The app is a Python script written using PyQt for the GUI, so it'll require
-PyQt4.  It's licensed under the New/Modified BSD license.
+The app is a Python 3 script written using PyQt5 for the GUI.  It's
+licensed under the New/Modified BSD license.
 
 USAGE
 -----
@@ -40,4 +40,13 @@ TODO
 * Add an option to check currently-selected savegames, so a bunch can be
   easily checked from the GUI, rather than having to check every single
   one.
+
+CHANGELOG
+---------
+
+* **Nov 1, 2021**
+  * Updated for Python 3 and PyQt5
+
+* **Sep 21, 2014**
+  * Original version, for Python 2 and PyQt4
 

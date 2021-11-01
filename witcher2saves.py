@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: set expandtab tabstop=4 shiftwidth=4:
 # 
-# Copyright (c) 2014, CJ Kucera
+# Copyright (c) 2014-2021, CJ Kucera
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 import os
 import sys
 import time
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 def sizeof_fmt(num):
     """
@@ -123,7 +123,7 @@ class SavegameCollection(object):
                     basename = filename[:-12]
                     self.savegames[basename].set_screenshot(os.path.join(self.basedir, filename))
                 #else:
-                #    print 'Unknown file: %s' % (filename)
+                #    print('Unknown file: %s' % (filename))
 
         # May as well keep track of how much room we're taking up, total.
         self.total_size = 0
@@ -149,7 +149,7 @@ class SavegameCollection(object):
         for key in sorted(self.savegames.keys()):
             yield self.savegames[key]
 
-class OpenSavegameDialog(QtGui.QFileDialog):
+class OpenSavegameDialog(QtWidgets.QFileDialog):
     """
     Class to open up a new savegame dir
     """
@@ -184,7 +184,7 @@ class SaveItemModel(QtGui.QStandardItemModel):
         super(SaveItemModel, self).clear()
         self.setHorizontalHeaderLabels(['Type', 'Num', 'Size', 'Date'])
 
-class SaveTableView(QtGui.QTableView):
+class SaveTableView(QtWidgets.QTableView):
     """
     Main widget that allows us to choose a savegame.  We pass in a
     QLabel which is where we'll show the preview image.
@@ -208,8 +208,8 @@ class SaveTableView(QtGui.QTableView):
         self.image_label = image_label
 
         # Some widget defaults
-        self.setSelectionBehavior(QtGui.QTableView.SelectRows)
-        self.setSelectionMode(QtGui.QTableView.SingleSelection)
+        self.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        self.setSelectionMode(QtWidgets.QTableView.SingleSelection)
         self.verticalHeader().hide()
         self.setSortingEnabled(True)
         self.setAlternatingRowColors(True)
@@ -303,7 +303,7 @@ class SaveTableView(QtGui.QTableView):
         if not selected.isEmpty():
             selected_item = selected.indexes()[self.COL_TYPE]
             self.current_selected_item = self.model.itemFromIndex(selected_item)
-            savegame = selected_item.data(self.ROLE_OBJ).toPyObject()
+            savegame = selected_item.data(self.ROLE_OBJ)
             if savegame.bmpfilename is not None:
                 self.image_label.setPixmap(QtGui.QPixmap(savegame.bmpfilename))
                 return
@@ -355,14 +355,14 @@ class SaveTableView(QtGui.QTableView):
         for row in range(self.model.rowCount()):
             item = self.model.item(row)
             if item.checkState() == QtCore.Qt.Checked:
-                savegame = item.data(self.ROLE_OBJ).toPyObject()
+                savegame = item.data(self.ROLE_OBJ)
                 savegame.delete()
 
     def row_checked(self, item):
         """
         What to do when a row is checked.  Mostly just updating our label
         """
-        savegame = item.data(self.ROLE_OBJ).toPyObject()
+        savegame = item.data(self.ROLE_OBJ)
         if item.checkState() == QtCore.Qt.Checked:
             self.checked_size += savegame.size
         else:
@@ -370,7 +370,7 @@ class SaveTableView(QtGui.QTableView):
         
         # A bit of sanity check, though this would indicate weird issues
         if self.checked_size < 0:
-            print "WARNING: negative checked_size encountered.  This shouldn't happen"
+            print("WARNING: negative checked_size encountered.  This shouldn't happen")
             self.checked_size = 0
 
         # Update our label
@@ -391,7 +391,7 @@ class SaveTableView(QtGui.QTableView):
         else:
             super(SaveTableView, self).keyPressEvent(e)
 
-class Gui(QtGui.QMainWindow):
+class Gui(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(Gui, self).__init__()
@@ -401,12 +401,12 @@ class Gui(QtGui.QMainWindow):
     def initUI(self):
 
         # Open a new dir on Ctrl-O
-        openAction = QtGui.QAction('&Open', self)
+        openAction = QtWidgets.QAction('&Open', self)
         openAction.setShortcut('Ctrl+O')
         openAction.triggered.connect(self.open_new_gamedir)
 
         # Exit on Ctrl-Q
-        exitAction = QtGui.QAction('&Exit', self)
+        exitAction = QtWidgets.QAction('&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.triggered.connect(self.close)
 
@@ -421,37 +421,37 @@ class Gui(QtGui.QMainWindow):
                 (self.palette().light().color().name(), self.palette().dark().color().name()))
 
         # Set up a main hbox to use
-        hbox = QtGui.QHBoxLayout()
-        main = QtGui.QWidget()
+        hbox = QtWidgets.QHBoxLayout()
+        main = QtWidgets.QWidget()
         main.setLayout(hbox)
         self.setCentralWidget(main)
 
         # Vbox to live inside the main hbox
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         hbox.addLayout(vbox)
 
         # Image Preview Area
-        self.image_label = QtGui.QLabel(self)
+        self.image_label = QtWidgets.QLabel(self)
         hbox.addWidget(self.image_label)
 
         # Main selection QTableView
-        self.size_label_checked = QtGui.QLabel('<b>%s</b>' % (sizeof_fmt(0)))
+        self.size_label_checked = QtWidgets.QLabel('<b>%s</b>' % (sizeof_fmt(0)))
         self.tv = SaveTableView(self.image_label, self.size_label_checked)
         self.load_savegames()
         vbox.addWidget(self.tv)
 
         # Control Button Area
-        btn_grid = QtGui.QGridLayout(self)
+        btn_grid = QtWidgets.QGridLayout(self)
         vbox.addLayout(btn_grid)
 
         # Size info grid
-        size_grid = QtGui.QGridLayout(self)
+        size_grid = QtWidgets.QGridLayout(self)
         btn_grid.addLayout(size_grid, 0, 0, 2, 1)
 
-        size_grid.addWidget(QtGui.QLabel('<i>Total Savegame Size:</i>'), 0, 0)
-        size_grid.addWidget(QtGui.QLabel('<i>Checked Savegame Size:</i>'), 1, 0)
+        size_grid.addWidget(QtWidgets.QLabel('<i>Total Savegame Size:</i>'), 0, 0)
+        size_grid.addWidget(QtWidgets.QLabel('<i>Checked Savegame Size:</i>'), 1, 0)
 
-        self.size_label_total = QtGui.QLabel('<b>%s</b>' % (sizeof_fmt(0)))
+        self.size_label_total = QtWidgets.QLabel('<b>%s</b>' % (sizeof_fmt(0)))
         size_grid.addWidget(self.size_label_total, 0, 1)
         self.update_total_size()
 
@@ -459,24 +459,24 @@ class Gui(QtGui.QMainWindow):
         size_grid.addWidget(self.size_label_checked, 1, 1)
 
         # Now the actual control buttons...
-        btn = QtGui.QPushButton('Select All')
+        btn = QtWidgets.QPushButton('Select All')
         btn.clicked.connect(self.tv.select_all)
         btn_grid.addWidget(btn, 0, 1)
 
-        btn = QtGui.QPushButton('Invert Selection')
+        btn = QtWidgets.QPushButton('Invert Selection')
         btn.clicked.connect(self.tv.invert_selection)
         btn_grid.addWidget(btn, 1, 1)
 
-        btn = QtGui.QPushButton('Delete Checked')
+        btn = QtWidgets.QPushButton('Delete Checked')
         btn.clicked.connect(self.delete_checked)
         btn_grid.addWidget(btn, 2, 0)
 
-        btn = QtGui.QPushButton('Refresh')
+        btn = QtWidgets.QPushButton('Refresh')
         btn.clicked.connect(self.refresh)
         btn_grid.addWidget(btn, 2, 1)
 
         # Global Parameters
-        QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('CleanLooks'))
+        QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('CleanLooks'))
         self.setMinimumSize(1100, 700)
         self.setWindowTitle('Witcher 2 Savegame Manager')
         self.show()
@@ -511,12 +511,12 @@ class Gui(QtGui.QMainWindow):
             else:
                 plural = 's'
 
-            reply = QtGui.QMessageBox.question(self, 'Delete Savegame%s' % (plural),
+            reply = QtWidgets.QMessageBox.question(self, 'Delete Savegame%s' % (plural),
                     'Are you sure you want to delete %d checked savegame%s?' % (count, plural),
-                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                    QtGui.QMessageBox.No)
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                    QtWidgets.QMessageBox.No)
             
-            if reply == QtGui.QMessageBox.Yes:
+            if reply == QtWidgets.QMessageBox.Yes:
                 self.tv.delete_checked()
                 self.refresh()
 
@@ -539,7 +539,7 @@ class Gui(QtGui.QMainWindow):
 
 def main():
 
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     gui = Gui()
     sys.exit(app.exec_())
 
